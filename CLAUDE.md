@@ -72,6 +72,7 @@ Darum gilt fürs Datenmodell schon jetzt: **eindeutige IDs** (UUID), **Änderung
   Browser (IndexedDB). Navigation + bearbeitbarer Baum (Ziehen oder Menü), Seiten mit Rahmen
   und Bausteinen, Markierungen, interne Links, Markierungsansichten, Prüfstatus + Filter
   „nur Entwürfe“, Ideenliste, Volltextsuche, Bilder lokal, Export/Import, Startinhalte.
+  - Erweiterung: **Filterleiste in der Bereichsansicht** (siehe unten).
 - **Etappe 2 (geplant):** Supabase-Abgleich mit Login, Bilder in die Cloud.
 - **Etappe 3 (geplant):** KI-Funktionen über die Claude-Schnittstelle, Teilen.
 
@@ -105,12 +106,37 @@ npm run build      # fertige App nach dist/ bauen
 | `src/seed.ts` | Startinhalte (nur beim allerersten Start) |
 | `src/importExport.ts` | Sicherung & Import |
 | `src/search.ts` | Volltextsuche |
+| `src/nodeFilter.ts` | Filter, Sortierung, Ansicht der Bereichsansicht |
 | `src/images.ts` | Bilder lokal speichern (große Fotos werden auf max. 1600 px verkleinert) |
 | `src/components/Tree.tsx` | Themenbaum in der Seitenleiste |
 | `src/components/Blocks.tsx` | Anzeige & Bearbeitung der Bausteine |
 | `src/components/ui.tsx` | Dialoge, Auswahllisten, Chips, Text mit Links |
 | `src/screens/*` | Ansichten (Start, Bereich, Seite, Suche, Notizen, Markierungen, Inhaltsverzeichnis, Sicherung) |
-| `src/logic.test.ts` | automatische Tests |
+| `src/logic.test.ts`, `src/nodeFilter.test.ts` | automatische Tests |
+
+## Bereichsansicht mit Filterleiste (`src/screens/NodeScreen.tsx`, Logik in `src/nodeFilter.ts`)
+
+Über der Seitenliste eines Bereichs steht eine Filterleiste:
+
+1. **Markierungen als Chips** (Tags, Körperregion, Sportart). Angeboten werden nur Markierungen,
+   die in den gerade angezeigten Seiten vorkommen (mit Anzahl). Mehrere gewählte Chips =
+   die Seite muss **alle** haben (UND). Gewählte Chips bleiben sichtbar, damit man sie abwählen kann.
+   Ab 12 Chips pro Gruppe gibt es „+ … weitere“.
+2. **Prüfstatus:** Alle / Nur Entwürfe / Nur geprüfte. Der Seitenleisten-Filter „nur Entwürfe
+   anzeigen“ wirkt zusätzlich.
+3. **Suchfeld** „In diesem Bereich suchen“: nutzt dieselbe Volltextsuche, zeigt aber nur Seiten
+   aus diesem Bereich (inkl. Unterthemen, wenn angehakt).
+4. **Liste / Tabelle.** Tabelle: Titel · Unterthema (direkter Bereich der Seite innerhalb des
+   angezeigten Bereichs; „direkt hier“ wenn die Seite dem Bereich selbst zugeordnet ist) ·
+   Markierungen · Status. Sortieren per Klick auf die Spaltenüberschrift (nochmal klicken =
+   umgekehrt). Leere Werte stehen immer am Ende.
+5. **Gemerkt pro Bereich** im Browser (`localStorage`, Schlüssel `node-filter:<Bereichs-ID>`):
+   Filter, Suchbegriff, Ansicht, Sortierung und das Häkchen „inkl. Unterthemen“.
+   Das sind reine Anzeige-Einstellungen – **Seiten werden dadurch nie verändert** und sie sind
+   nicht Teil der Sicherung. Ältere/ungültige gespeicherte Werte repariert `normalizeFilter()`.
+
+Handy: Status- und Markierungsfilter sind unter „Filter ▾“ einklappbar (anfangs zu, außer es ist
+schon ein Filter aktiv; die Zahl zeigt aktive Filter). Die Tabelle lässt sich seitlich wischen.
 
 ## Datenmodell (Kurzfassung)
 
