@@ -296,10 +296,11 @@ export function MarkChips({ page }: { page: Page }) {
 }
 
 /* ---------- Liste von Seiten ---------- */
-export function PageList({ pages, empty = 'Noch keine Seiten.' }: { pages: Page[]; empty?: string }) {
+export function PageList({ pages, empty = 'Noch keine Seiten.', keepOrder }: { pages: Page[]; empty?: string; keepOrder?: boolean }) {
   const { onlyDrafts } = useDraftFilter();
   const nodes = useNodes();
-  const shown = (onlyDrafts ? pages.filter((p) => p.status === 'draft') : pages).slice().sort((a, b) => a.title.localeCompare(b.title, 'de'));
+  const filtered = onlyDrafts ? pages.filter((p) => p.status === 'draft') : pages;
+  const shown = keepOrder ? filtered : filtered.slice().sort((a, b) => a.title.localeCompare(b.title, 'de'));
   if (!shown.length) return <p className="muted">{onlyDrafts && pages.length ? 'Keine Entwürfe hier (Filter „nur Entwürfe“ ist an).' : empty}</p>;
   return (
     <ul className="page-list">
